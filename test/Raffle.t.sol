@@ -65,4 +65,49 @@ contract RaffleTest is Test {
         vm.prank(player);
         raffle.enterRaffle{value: fee}();
     }
+
+    function testCheckUpkeepReturnsFalseIfItHasNoBalance() public {
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+        (bool upkeepNeeded,) = raffle.checkUpKeep("");
+        assert(!upkeepNeeded);
+    }
+
+    function testCheckUpkeepReturnsFalseIfRaffleIsntOpen() public {
+        vm.prank(player);
+        raffle.enterRaffle{value: fee}();
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+        raffle.performUpkeep("");
+        Raffle.RaffleState raffleState = raffle.getRaffleState();
+        (bool upkeepNeeded,) = raffle.checkUpKeep("");
+        assert(raffleState == Raffle.RaffleState.CALCULATING);
+        assert(upkeepNeeded == false);
+    }
+
+    function testCheckUpkeepReturnsFalseIfEnoughTimeHasntPassed() public {
+        vm.prank(player);
+        raffle.enterRaffle{value: fee}();
+        (bool upkeepNeeded,) = raffle.checkUpKeep("");
+        assert(!upkeepNeeded);
+    }
+
+    function testPerformUpkeepRevertsIfCheckUpkeepIsFalse() public {
+        uint256 currentBalance = 0;
+        uint256 numPlayers = 0;
+        Raffle.RaffleState rState = raffle.getRaffleState();
+        vm.expectRevert(
+            abi.encodeWithSelector(Raffle.Raffle__UpkeepNotNeeded.selector, currentBalance, numPlayers, rState)
+        );
+        raffle.performUpkeep("");
+    }
+
+    function testCheckUpkeepReturnsTrueWhenParametersGood() public {
+        vm.prank(player);
+        raffle.enterRaffle{value: fee}();
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+        (bool upkeepNeeded,) = raffle.checkUpKeep("");
+        assert(upkeepNeeded);
+    }
 }

@@ -5,7 +5,7 @@ import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interface
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 /**
- * @title  A simple raffle contract
+ *     @title  A simple raffle contract
  *     @author Ajayi Samuel
  *     @notice This contract is for creating a simple raffle
  *     @dev Implements Chainlink VRFv2
